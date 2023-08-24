@@ -243,8 +243,8 @@ color:rgb(170, 0, 0);</string>
             <property name="spacing">
              <number>7</number>
             </property>
-            <item row="2" column="1">
-             <widget class="QLineEdit" name="heatout">
+            <item row="1" column="3">
+             <widget class="QLineEdit" name="weight1">
               <property name="minimumSize">
                <size>
                 <width>684</width>
@@ -258,45 +258,6 @@ color: rgb(0, 55, 80);
 font: 75 12pt &quot;Calibri&quot; bold;
 
 </string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_3">
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>40</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">color:rgb(75, 62, 87);
-font: 14pt &quot;Calibri&quot;;
-margin : 5px;</string>
-              </property>
-              <property name="text">
-               <string>heatout of incubator</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="age">
-              <property name="minimumSize">
-               <size>
-                <width>684</width>
-                <height>41</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">background-color: rgba(0, 0, 0, 0);
-border:1px solid rgb(0, 55, 80);
-color: rgb(0, 55, 80);
-font: 75 12pt &quot;Calibri&quot; bold;
-
-</string>
-              </property>
-              <property name="text">
-               <string/>
               </property>
              </widget>
             </item>
@@ -319,6 +280,24 @@ margin : 5px;
               </property>
              </widget>
             </item>
+            <item row="2" column="3">
+             <widget class="QLineEdit" name="heatout1">
+              <property name="minimumSize">
+               <size>
+                <width>684</width>
+                <height>41</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgba(0, 0, 0, 0);
+border:1px solid rgb(0, 55, 80);
+color: rgb(0, 55, 80);
+font: 75 12pt &quot;Calibri&quot; bold;
+
+</string>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label">
               <property name="minimumSize">
@@ -337,8 +316,8 @@ margin : 5px;</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="weight">
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="age1">
               <property name="minimumSize">
                <size>
                 <width>684</width>
@@ -353,22 +332,102 @@ font: 75 12pt &quot;Calibri&quot; bold;
 
 </string>
               </property>
+              <property name="text">
+               <string/>
+              </property>
              </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>40</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color:rgb(75, 62, 87);
+font: 14pt &quot;Calibri&quot;;
+margin : 5px;</string>
+              </property>
+              <property name="text">
+               <string>heatout of incubator</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_2">
+              <property name="styleSheet">
+               <string notr="true">color:rgb(75, 62, 87);
+font: 14pt &quot;Calibri&quot;;
+margin : 5px;</string>
+              </property>
+              <property name="text">
+               <string>room temp</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <layout class="QFormLayout" name="formLayout"/>
             </item>
            </layout>
           </item>
           <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QLineEdit" name="temp">
+              <property name="styleSheet">
+               <string notr="true">background-color: rgba(0, 0, 0, 0);
+border:1px solid rgb(0, 55, 80);
+color: rgb(0, 55, 80);
+font: 75 12pt &quot;Calibri&quot; bold;
+</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="styleSheet">
+               <string notr="true">color:rgb(75, 62, 87);
+font: 14pt &quot;Calibri&quot;;
+margin : 5px;</string>
+              </property>
+              <property name="text">
+               <string>room humidity</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="hum">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgba(0, 0, 0, 0);
+border:1px solid rgb(0, 55, 80);
+color: rgb(0, 55, 80);
+font: 75 12pt &quot;Calibri&quot; bold;
+</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>150</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
           <item>
            <widget class="QPushButton" name="predict">
@@ -397,19 +456,6 @@ border-radius:20px;
              <string>Predict</string>
             </property>
            </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>150</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </item>

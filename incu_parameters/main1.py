@@ -1,11 +1,18 @@
 import sys
 from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog,QApplication,QWidget
+from PyQt5.QtWidgets import QDialog,QApplication,QWidget,QMainWindow,QPushButton
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import *
 import dbdetails,db
 import mysql.connector
+import requests, json
+import sklearn
+import warnings
+warnings.filterwarnings('ignore')
+
+import shutup
+shutup.please()
 
 #creating database and new table in mysql 
 dbuser, dbpass = dbdetails.execute()
@@ -22,60 +29,18 @@ mydb = mysql.connector.connect(
 cursor = mydb.cursor()
 cursor = mydb.cursor(buffered=True)
 
-import numpy as np
-import pandas as pd
-dataset1=pd.read_csv("refined.csv")
-x=dataset1[["age","weight","heatout","roomhum","roomtemp"]].copy()
-y=dataset1[["incuhum"]].copy()
-x["intercept"]=1
-x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
-x_t=x.T
-B=np.linalg.inv(x_t@x)@x_t@y
 
+def custom_excepthook(type, value, traceback):
+    # Handle exceptions and warnings here
+    # You can display a message or log the issue
+    print("Exception or warning occurred:", type, value)
 
-B.index=x.columns
-predictionsh=x@B
+# Install the custom excepthook
+sys.excepthook = custom_excepthook
 
+def show_warning():
+    warnings.warn("This is a sample warning!")
 
-x=dataset1[["age","weight","heatout","roomhum","roomtemp"]].copy()
-y=dataset1[["incutemp"]].copy()
-x["intercept"]=1
-x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
-x_t=x.T
-B=np.linalg.inv(x_t@x)@x_t@y
-
-
-B.index=x.columns
-predictionst=x@B
-
-prediction=pd.concat([dataset1["incuhum"],predictionsh["incuhum"],dataset1["incutemp"],predictionst["incutemp"]],axis=1)
-prediction.columns=["actual_incuhum","predicted_incuhum","actual_incutemp","predicted_incutemp"]
-
-#Part 2:
-
-breath=pd.read_csv("breath.csv")
-x=breath[["age","weight","heatout","roomhum","roomtemp"]].copy()
-y=breath[["resp_rate"]].copy()
-x["intercept"]=1
-x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
-x_t=x.T
-B=np.linalg.inv(x_t@x)@x_t@y
-
-B.index=x.columns
-predictionsr=x@B
-
-x=breath[["age","weight","heatout","roomhum","roomtemp"]].copy()
-y=breath[["volume"]].copy()
-x["intercept"]=1
-x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
-x_t=x.T
-B=np.linalg.inv(x_t@x)@x_t@y
-
-B.index=x.columns
-predictionsv=x@B
-
-prediction_final=pd.concat([breath["resp_rate"],predictionsr["resp_rate"],breath["volume"],predictionsv["volume"]],axis=1)
-prediction_final.columns=["resp_rate_actual","resp_rate_prediction","volume_actual","volume_predicted"]
 
 
 class WelcomeScreen(QDialog):
@@ -193,6 +158,8 @@ class DashScreen(QDialog):
         tele=TeleScreen()
         widget.addWidget(tele)
         widget.setCurrentIndex(widget.currentIndex()+1)
+
+        '''
         import requests
         import time
         import Adafruit_DHT as dht
@@ -240,35 +207,37 @@ class DashScreen(QDialog):
                 bot.sendMessage(chat_id, "breath rate of the child per minute: "+ str(resp_rate))  
 
 
-        MessageLoop(bot, handle).run_as_thread()
+        MessageLoop(bot, handle).run_as_thread()'''
+
+class TeleScreen(QDialog):
+    def __init__(self):
+        super(TeleScreen,self).__init__()
+        loadUi("telepage.ui",self)
 
 class PredScreen(QDialog):
     def __init__(self):
         super(PredScreen,self).__init__()
         loadUi("addpat.ui",self)
 
-        self.predict.clicked.connect(self.gotoresult)
+        self.predict.clicked.connect(self.gotoresult1)
         self.logout.clicked.connect(self.gotowelcome)
         self.dash.clicked.connect(self.gotodash)
 
-    def gotoresult(self):
-        age=self.age.text()
-        weight=self.weight.text()
-        heatout=self.heatout/text()
+    def gotoresult1(self):
+        global age,weight,heatout,roomtemp,roomhum
+        age=int(self.age1.text())
+        weight=int(self.weight1.text())
+        heatout=float(self.heatout1.text())
+        #roomtemp=float(self.temp.text())
+        #roomhum=float(self.hum.text())
 
-        from sklearn.linear_model import LinearRegression
-        linear=LinearRegression()
-
-        import requests, json
+        
         # Enter your API key here
         api_key = "cb107b2a951040dd7226208a5d508799"
 
         # base_url variable to store url
         base_url = "http://api.openweathermap.org/data/2.5/weather?"
-
-        # Give city name
-        city_name = input("Enter city name : ")
-
+        city_name="Chennai"
         # complete_url variable to store
         # complete url address
         complete_url = base_url + "appid=" + api_key + "&q=" + city_name
@@ -281,71 +250,141 @@ class PredScreen(QDialog):
         # convert json format data into
         # python format data
         x = response.json()
-
+        
         # Now x contains list of nested dictionaries
         # Check the value of "cod" key is equal to
         # "404", means city is found otherwise,
         # city is not found
         if x["cod"] != "404":
 
-                # store the value of "main"
-                # key in variable y
-                y = x["main"]
+            # store the value of "main"
+            # key in variable y
+            y = x["main"]
 
-                # store the value corresponding
-                # to the "temp" key of y
-                current_temperature = y["temp"]
+            # store the value corresponding
+            # to the "temp" key of y
+            current_temperature = y["temp"]
 
-                # store the value corresponding
-                # to the "pressure" key of y
-                current_pressure = y["pressure"]
+            # store the value corresponding
+            # to the "pressure" key of y
+            current_pressure = y["pressure"]
 
-                # store the value corresponding
-                # to the "humidity" key of y
-                current_humidity = y["humidity"]
+            # store the value corresponding
+            # to the "humidity" key of y
+            current_humidity = y["humidity"]
 
-                # store the value of "weather"
-                # key in variable z
-                z = x["weather"]
+            # store the value of "weather"
+            # key in variable z
+            z = x["weather"]
+            
+            # store the value corresponding
+            # to the "description" key at
+            # the 0th index of z
+            weather_description = z[0]["description"]
 
-                # store the value corresponding
-                # to the "description" key at
-                # the 0th index of z
-                weather_description = z[0]["description"]
+            # print following values
+            print(" Temperature (in kelvin unit) = " + str(current_temperature) + "\n atmospheric pressure (in hPa unit) = " +
+                    str(current_pressure) + "\n humidity (in percentage) = " + str(current_humidity) + "\n description = " + str(weather_description))
+            roomtemp=current_temperature-273.16
+            roomhum=current_humidity
 
-                # print following values
-                print(" Temperature (in kelvin unit) = " + str(current_temperature) + "\n atmospheric pressure (in hPa unit) = " +
-                      str(current_pressure) + "\n humidity (in percentage) = " + str(current_humidity) + "\n description = " + str(weather_description))
-                roomtemp=current_temperature-273.16
-                roomhum=current_humidity
+            
 
-                
-
-
+        
         else:
-                print(" City Not Found ")
-                roomtemp=float(input("Enter the temprature of the room"))
-                roomhum=float(input("Enter the humidity of the room"))
+            pass
+            print(" City Not Found ")
+            roomtemp=float(input("Enter the temprature of the room"))
+            roomhum=float(input("Enter the humidity of the room"))
+        
+
+        #y=predictions.execute(age,weight,heatout,roomhum,roomtemp)
+        #print(y)
+        #self.value.setText("incubator_humidity to be set :",incuhum, "incubator_temperature to be set :",incutemp,"respiratory rate of the child per minute: ",resp_rate,"respiratory air volume in ml of the child",volume)
+        import numpy as np
+        import pandas as pd
+        dataset1=pd.read_csv("refined.csv")
+        x=dataset1[["age","weight","heatout","roomhum","roomtemp"]].copy()
+        y=dataset1[["incuhum"]].copy()
+        x["intercept"]=1
+        x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
+        x_t=x.T
+        B=np.linalg.inv(x_t@x)@x_t@y
 
 
-        linear.fit(dataset1[["age","weight","heatout","roomhum","roomtemp"]],dataset1[["incutemp"]])
+        B.index=x.columns
+        predictionsh=x@B
+
+
+        x=dataset1[["age","weight","heatout","roomhum","roomtemp"]].copy()
+        y=dataset1[["incutemp"]].copy()
+        x["intercept"]=1
+        x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
+        x_t=x.T
+        B=np.linalg.inv(x_t@x)@x_t@y
+
+
+        B.index=x.columns
+        predictionst=x@B
+
+        prediction=pd.concat([dataset1["incuhum"],predictionsh["incuhum"],dataset1["incutemp"],predictionst["incutemp"]],axis=1)
+        prediction.columns=["actual_incuhum","predicted_incuhum","actual_incutemp","predicted_incutemp"]
+
+        #Part 2:
+
+        breath=pd.read_csv("breath.csv")
+        x=breath[["age","weight","heatout","roomhum","roomtemp"]].copy()
+        y=breath[["resp_rate"]].copy()
+        x["intercept"]=1
+        x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
+        x_t=x.T
+        B=np.linalg.inv(x_t@x)@x_t@y
+
+        B.index=x.columns
+        predictionsr=x@B
+
+        x=breath[["age","weight","heatout","roomhum","roomtemp"]].copy()
+        y=breath[["volume"]].copy()
+        x["intercept"]=1
+        x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
+        x_t=x.T
+        B=np.linalg.inv(x_t@x)@x_t@y
+
+        B.index=x.columns
+        predictionsv=x@B
+
+        prediction_final=pd.concat([breath["resp_rate"],predictionsr["resp_rate"],breath["volume"],predictionsv["volume"]],axis=1)
+        prediction_final.columns=["resp_rate_actual","resp_rate_prediction","volume_actual","volume_predicted"]
+
+
+
+        
+        from sklearn.linear_model import LinearRegression
+        linear=LinearRegression()
+        
+        linear.fit(dataset1[["age","weight","heatout","roomhum","roomtemp"]].values,dataset1[["incutemp"]].values)
+        linear.feature_names_in_=["age","weight","heatout","roomhum","roomtemp"]
         y=np.array([[age,weight,heatout,roomhum,roomtemp]])
+        
         prediction=linear.predict(y)
         #["age","weight","heatout","roomhum","roomtemp"]
         incutemp=(float(prediction))
-
+        
         #linear=LinearRegression()
-        linear.fit(dataset1[["age","weight","heatout","roomhum","roomtemp"]],dataset1[["incuhum"]])
+        linear.fit(dataset1[["age","weight","heatout","roomhum","roomtemp"]].values,dataset1[["incuhum"]].values)
+        linear.feature_names_in_=["age","weight","heatout","roomhum","roomtemp"]
         y=np.array([[age,weight,heatout,roomhum,roomtemp]])
         prediction=linear.predict(y)
         incuhum=(float(prediction))
 
-        linear.fit(dataset1[["age","weight","heatout","roomhum","roomtemp"]],breath[["resp_rate"]])
+        linear.fit(dataset1[["age","weight","heatout","roomhum","roomtemp"]].values,breath[["resp_rate"]].values)
+        linear.feature_names_in_=["age","weight","heatout","roomhum","roomtemp"]
         y=np.array([[age,weight,heatout,roomhum,roomtemp]])
         prediction=linear.predict(y)
         resp_rate=(float(prediction))
 
-        linear.fit(dataset1[["age","weight","heatout","roomhum","roomtemp"]],breath[["volume"]])
+        linear.fit(dataset1[["age","weight","heatout","roomhum","roomtemp"]].values,breath[["volume"]].values)
+        linear.feature_names_in_=["age","weight","heatout","roomhum","roomtemp"]
         y=np.array([[age,weight,heatout,roomhum,roomtemp]])
         prediction=linear.predict(y)
         volume=(float(prediction))
@@ -355,7 +394,9 @@ class PredScreen(QDialog):
         print("respiratory rate of the child per minute",resp_rate)
         print("respiratory air volume in ml of the child",volume)
 
-        self.value.setText("incubator_humidity to be set :",incuhum, "incubator_temperature to be set :",incutemp,"respiratory rate of the child per minute: ",resp_rate,"respiratory air volume in ml of the child",volume)
+        #Each time I add this,it should goto the cloud
+
+
 
     def gotowelcome(self):
         welcome=WelcomeScreen()
