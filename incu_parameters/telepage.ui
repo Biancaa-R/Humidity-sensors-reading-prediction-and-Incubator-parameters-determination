@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>811</width>
-    <height>658</height>
+    <width>1909</width>
+    <height>1075</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>811</width>
-     <height>671</height>
+     <x>-120</x>
+     <y>-10</y>
+     <width>2141</width>
+     <height>1101</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -30,8 +30,8 @@ background-color:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>150</y>
+      <x>890</x>
+      <y>130</y>
       <width>481</width>
       <height>51</height>
      </rect>
@@ -46,6 +46,8 @@ font: 22pt &quot;MS Sans Serif&quot;;</string>
    </widget>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="logo5.avif"/>
+ </resources>
  <connections/>
 </ui>

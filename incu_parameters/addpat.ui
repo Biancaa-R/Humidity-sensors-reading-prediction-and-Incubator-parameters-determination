@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1400</width>
-    <height>765</height>
+    <height>750</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -96,20 +96,52 @@
             <number>0</number>
            </property>
            <item>
-            <spacer name="verticalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Preferred</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>1000</height>
-              </size>
-             </property>
-            </spacer>
+            <layout class="QVBoxLayout" name="verticalLayout_6">
+             <item>
+              <widget class="QLabel" name="data1">
+               <property name="styleSheet">
+                <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;
+color:rgb(216, 196, 255);</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="data2">
+               <property name="styleSheet">
+                <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;
+color:rgb(216, 196, 255);</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="data3">
+               <property name="styleSheet">
+                <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;
+color:rgb(216, 196, 255);</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="data4">
+               <property name="styleSheet">
+                <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;
+color:rgb(216, 196, 255);</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <widget class="QPushButton" name="dash">
@@ -217,8 +249,8 @@ color: rgb(255, 85, 127);</string>
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">font: 13pt &quot;Calibri&quot; bold;
-color:rgb(170, 0, 0);</string>
+             <string notr="true">font: 10pt &quot;Calibri&quot; bold;
+color:rgb(0, 0, 0);</string>
             </property>
             <property name="text">
              <string/>
@@ -243,24 +275,6 @@ color:rgb(170, 0, 0);</string>
             <property name="spacing">
              <number>7</number>
             </property>
-            <item row="1" column="3">
-             <widget class="QLineEdit" name="weight1">
-              <property name="minimumSize">
-               <size>
-                <width>684</width>
-                <height>41</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">background-color: rgba(0, 0, 0, 0);
-border:1px solid rgb(0, 55, 80);
-color: rgb(0, 55, 80);
-font: 75 12pt &quot;Calibri&quot; bold;
-
-</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_5">
               <property name="minimumSize">
@@ -298,8 +312,26 @@ font: 75 12pt &quot;Calibri&quot; bold;
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label">
+            <item row="1" column="3">
+             <widget class="QLineEdit" name="weight1">
+              <property name="minimumSize">
+               <size>
+                <width>684</width>
+                <height>41</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgba(0, 0, 0, 0);
+border:1px solid rgb(0, 55, 80);
+color: rgb(0, 55, 80);
+font: 75 12pt &quot;Calibri&quot; bold;
+
+</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_3">
               <property name="minimumSize">
                <size>
                 <width>150</width>
@@ -312,7 +344,7 @@ font: 14pt &quot;Calibri&quot;;
 margin : 5px;</string>
               </property>
               <property name="text">
-               <string>weight in grams</string>
+               <string>heatout of incubator</string>
               </property>
              </widget>
             </item>
@@ -337,23 +369,8 @@ font: 75 12pt &quot;Calibri&quot; bold;
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_3">
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>40</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">color:rgb(75, 62, 87);
-font: 14pt &quot;Calibri&quot;;
-margin : 5px;</string>
-              </property>
-              <property name="text">
-               <string>heatout of incubator</string>
-              </property>
-             </widget>
+            <item row="3" column="1">
+             <layout class="QFormLayout" name="formLayout"/>
             </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_2">
@@ -367,8 +384,23 @@ margin : 5px;</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
-             <layout class="QFormLayout" name="formLayout"/>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label">
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>40</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color:rgb(75, 62, 87);
+font: 14pt &quot;Calibri&quot;;
+margin : 5px;</string>
+              </property>
+              <property name="text">
+               <string>weight in grams</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>

@@ -9,10 +9,21 @@ import mysql.connector
 import requests, json
 import sklearn
 import warnings
+from requests.exceptions import ConnectionError
+
+from datetime import datetime
+import time
+import telepot
+import serial
+            
+
+from telepot.loop import MessageLoop
 warnings.filterwarnings('ignore')
 
-import shutup
-shutup.please()
+incuhum=0
+incutemp=0
+resp_rate=0
+volume=0
 
 #creating database and new table in mysql 
 dbuser, dbpass = dbdetails.execute()
@@ -28,6 +39,66 @@ mydb = mysql.connector.connect(
          
 cursor = mydb.cursor()
 cursor = mydb.cursor(buffered=True)
+
+#y=predictions.execute(age,weight,heatout,roomhum,roomtemp)
+#print(y)
+#self.value.setText("incubator_humidity to be set :",incuhum, "incubator_temperature to be set :",incutemp,"respiratory rate of the child per minute: ",resp_rate,"respiratory air volume in ml of the child",volume)
+import numpy as np
+import pandas as pd
+dataset1=pd.read_csv("refined.csv")
+x=dataset1[["age","weight","heatout","roomhum","roomtemp"]].copy()
+y=dataset1[["incuhum"]].copy()
+x["intercept"]=1
+x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
+x_t=x.T
+B=np.linalg.inv(x_t@x)@x_t@y
+
+
+B.index=x.columns
+predictionsh=x@B
+
+
+x=dataset1[["age","weight","heatout","roomhum","roomtemp"]].copy()
+y=dataset1[["incutemp"]].copy()
+x["intercept"]=1
+x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
+x_t=x.T
+B=np.linalg.inv(x_t@x)@x_t@y
+
+
+B.index=x.columns
+predictionst=x@B
+
+prediction=pd.concat([dataset1["incuhum"],predictionsh["incuhum"],dataset1["incutemp"],predictionst["incutemp"]],axis=1)
+prediction.columns=["actual_incuhum","predicted_incuhum","actual_incutemp","predicted_incutemp"]
+
+#Part 2:
+
+breath=pd.read_csv("breath.csv")
+x=breath[["age","weight","heatout","roomhum","roomtemp"]].copy()
+y=breath[["resp_rate"]].copy()
+x["intercept"]=1
+x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
+x_t=x.T
+B=np.linalg.inv(x_t@x)@x_t@y
+
+B.index=x.columns
+predictionsr=x@B
+
+x=breath[["age","weight","heatout","roomhum","roomtemp"]].copy()
+y=breath[["volume"]].copy()
+x["intercept"]=1
+x=x[["intercept","age","weight","heatout","roomhum","roomtemp"]]
+x_t=x.T
+B=np.linalg.inv(x_t@x)@x_t@y
+
+B.index=x.columns
+predictionsv=x@B
+
+prediction_final=pd.concat([breath["resp_rate"],predictionsr["resp_rate"],breath["volume"],predictionsv["volume"]],axis=1)
+prediction_final.columns=["resp_rate_actual","resp_rate_prediction","volume_actual","volume_predicted"]
+
+
 
 
 def custom_excepthook(type, value, traceback):
@@ -142,6 +213,12 @@ class DashScreen(QDialog):
         self.logout.clicked.connect(self.gotowelcome)
         self.new2.clicked.connect(self.gotopred)
         self.tele.clicked.connect(self.gototele)
+        self.register2.clicked.connect(self.gototable)
+
+    def gototable(self):
+        table=TableScreen()
+        widget.addWidget(table)
+        widget.setCurrentIndex(widget.currentIndex()+1)
 
     def gotowelcome(self):
         welcome=WelcomeScreen()
@@ -159,60 +236,109 @@ class DashScreen(QDialog):
         widget.addWidget(tele)
         widget.setCurrentIndex(widget.currentIndex()+1)
 
-        '''
-        import requests
-        import time
-        import Adafruit_DHT as dht
-        while True:
-            humidity,temperature=dht.read_retry(dht.DHT11,4)
-            requests.get('https://api.thingspeak.com/update?api_key=B5HXLPLMWO3DQE1O&field1='+str(temperature)+'&field2='+str(humidity)+'&field3='+str(incutemp)+'&field4='+str(incuhum)+'&field5='+str(resp_rate)+'&field6='+str(volume))
-            break
 
-        from datetime import datetime
-        import time
-        import telepot
-        import RPi.GPIO as GPIO
-        import Adafruit_DHT as dht
+class TeleScreen(QDialog):
+    def __init__(self):
+        super(TeleScreen,self).__init__()
+        loadUi("choo.ui",self)
+        self.ok.clicked.connect(self.gotosendmsg)
+        self.cancel.clicked.connect(self.gotocancel)
+        self.dash.clicked.connect(self.gotodash)
+        self.logout.clicked.connect(self.gotowelcome)
+
+    def gotosendmsg(self):
+        print("The bot is started")
         from telepot.loop import MessageLoop
-        #Connect DHT11 to pin 4
-
-        GPIO.setmode(GPIO.BCM)
 
         def th():
-            humidity,temperature = dht.read_retry(dht.DHT11, 4)
-            humidity = round(humidity, 2)
-            temperature = round(temperature, 2)
-            return temperature,humidity
+            import serial
+            import time
+
+            ser=serial.Serial("COM5",9600,timeout=1)
+
+            time.sleep(0.5)
+            list1=[]
+
+            for i in range(0,5):
+                line=ser.readline()
+
+                line=line.decode("utf")
+                #print(line)       
+
+                if line not in ["DHTxx test!",None]:
+                    y=line.split()
+                    if len(y)>3 :
+                        humidity=y[1]
+                        temperature=y[3]
+                        if humidity in ["test","test!"]:
+                            continue
+                        if len(humidity)>0:
+                            list1.append(humidity)
+                            list1.append(temperature)
+                        
+                        return (list1)
+                            #time.sleep(10)
+
+                            #requests.get('https://api.thingspeak.com/update?api_key=B5HXLPLMWO3DQE1O&field1='+str(temperature)+'&field2='+str(humidity)+'&field3='+str(incutemp)+'&field4='+str(incuhum)+'&field5='+str(resp_rate)+'&field6='+str(volume)
+
+
+                            #humidity = round(humidity, 2)
+                            #temperature = round(temperature, 2)
 
         bot = telepot.Bot('6355723537:AAHCm412-9KGQFhM6xoO0C1D-DXsLMLvdYc')
 
         def handle(msg):
             content_type, chat_type, chat_id = telepot.glance(msg)
             #if you want to allow access only from a certain user enable the below line and use intentaion for the rest of the LOCs untill MessageLoop, To get your telegram ID use underinfobot
-            #if(msg['from']['id']==************):
+            #if(msg['from']['id']==*):
             if('username' in msg['from']):
                 print(msg['from']['username'], " Sent msg",msg['text']," ")
             else:
                 print(msg['text'])
             if(msg['text'] == '/dht'):
                 r=th()
+                
+                    
                 bot.sendMessage(chat_id, " current Temp of incubator: "+str(r[0]))
+
+
                 bot.sendMessage(chat_id, "current Humdidity of incubator: "+str(r[1]))
                 bot.sendMessage(chat_id, "Temperature of incubator to be set"+str(incutemp))
                 bot.sendMessage(chat_id, "humidity of incubator to be set"+str(incuhum)) 
 
-            if(msg['text'] == '/rates'):  
+            if(msg['text'] == '/rates'):
+                r=th()
                 bot.sendMessage(chat_id, " current Temp of incubator: "+str(r[0]))
                 bot.sendMessage(chat_id, "current Humdidity of incubator: "+str(r[1]))
-                bot.sendMessage(chat_id, "breath rate of the child per minute: "+ str(resp_rate))  
+                bot.sendMessage(chat_id, "breath rate of the child per minute: "+ str(resp_rate))
+
+            if (msg['text'].lower() in ["thanks","thank you","thankyou"] ):
+                bot.sendMessage(chat_id,"welcome ")
+                
+
+        MessageLoop(bot, handle).run_as_thread()
 
 
-        MessageLoop(bot, handle).run_as_thread()'''
 
-class TeleScreen(QDialog):
-    def __init__(self):
-        super(TeleScreen,self).__init__()
-        loadUi("telepage.ui",self)
+
+    def gotocancel(self):
+        self.value.setText("The bot is terminated")
+        print("bot stopped")
+
+        
+
+    def gotowelcome(self):
+        welcome=WelcomeScreen()
+        widget.addWidget(welcome)
+        widget.setCurrentIndex(widget.currentIndex()+1)
+
+    def gotodash(self):
+        dash=DashScreen()
+        widget.addWidget(dash)
+        widget.setCurrentIndex(widget.currentIndex()+1)
+
+
+
 
 class PredScreen(QDialog):
     def __init__(self):
@@ -225,79 +351,86 @@ class PredScreen(QDialog):
 
     def gotoresult1(self):
         global age,weight,heatout,roomtemp,roomhum
+        global incuhum,incutemp,resp_rate,volume
         age=int(self.age1.text())
         weight=int(self.weight1.text())
         heatout=float(self.heatout1.text())
-        #roomtemp=float(self.temp.text())
-        #roomhum=float(self.hum.text())
+        roomtemp=float(self.temp.text())
+        roomhum=float(self.hum.text())
 
-        
-        # Enter your API key here
-        api_key = "cb107b2a951040dd7226208a5d508799"
+        self.age1.setText("")
+        self.weight1.setText("")
+        self.heatout1.setText("")
+        self.temp.setText("")
+        self.hum.setText("")
 
-        # base_url variable to store url
-        base_url = "http://api.openweathermap.org/data/2.5/weather?"
-        city_name="Chennai"
-        # complete_url variable to store
-        # complete url address
-        complete_url = base_url + "appid=" + api_key + "&q=" + city_name
+        '''try:
+            # Enter your API key here
+            api_key = "cb107b2a951040dd7226208a5d508799"
 
-        # get method of requests module
-        # return response object
-        response = requests.get(complete_url)
+            # base_url variable to store url
+            base_url = "http://api.openweathermap.org/data/2.5/weather?"
+            city_name="Chennai"
+            # complete_url variable to store
+            # complete url address
+            complete_url = base_url + "appid=" + api_key + "&q=" + city_name
 
-        # json method of response object
-        # convert json format data into
-        # python format data
-        x = response.json()
-        
-        # Now x contains list of nested dictionaries
-        # Check the value of "cod" key is equal to
-        # "404", means city is found otherwise,
-        # city is not found
-        if x["cod"] != "404":
+            # get method of requests module
+            # return response object
+            response = requests.get(complete_url)
 
-            # store the value of "main"
-            # key in variable y
-            y = x["main"]
-
-            # store the value corresponding
-            # to the "temp" key of y
-            current_temperature = y["temp"]
-
-            # store the value corresponding
-            # to the "pressure" key of y
-            current_pressure = y["pressure"]
-
-            # store the value corresponding
-            # to the "humidity" key of y
-            current_humidity = y["humidity"]
-
-            # store the value of "weather"
-            # key in variable z
-            z = x["weather"]
+            # json method of response object
+            # convert json format data into
+            # python format data
+            x = response.json()
             
-            # store the value corresponding
-            # to the "description" key at
-            # the 0th index of z
-            weather_description = z[0]["description"]
+            # Now x contains list of nested dictionaries
+            # Check the value of "cod" key is equal to
+            # "404", means city is found otherwise,
+            # city is not found
+            if x["cod"] != "404":
 
-            # print following values
-            print(" Temperature (in kelvin unit) = " + str(current_temperature) + "\n atmospheric pressure (in hPa unit) = " +
-                    str(current_pressure) + "\n humidity (in percentage) = " + str(current_humidity) + "\n description = " + str(weather_description))
-            roomtemp=current_temperature-273.16
-            roomhum=current_humidity
+                # store the value of "main"
+                # key in variable y
+                y = x["main"]
+
+                # store the value corresponding
+                # to the "temp" key of y
+                current_temperature = y["temp"]
+
+                # store the value corresponding
+                # to the "pressure" key of y
+                current_pressure = y["pressure"]
+
+                # store the value corresponding
+                # to the "humidity" key of y
+                current_humidity = y["humidity"]
+
+                # store the value of "weather"
+                # key in variable z
+                z = x["weather"]
+                
+                # store the value corresponding
+                # to the "description" key at
+                # the 0th index of z
+                weather_description = z[0]["description"]
+
+                # print following values
+                print(" Temperature (in kelvin unit) = " + str(current_temperature) + "\n atmospheric pressure (in hPa unit) = " +
+                        str(current_pressure) + "\n humidity (in percentage) = " + str(current_humidity) + "\n description = " + str(weather_description))
+                roomtemp=current_temperature-273.16
+                roomhum=current_humidity
+
+                
 
             
+            else:
+                pass
+                print(" City Not Found ")
 
-        
-        else:
-            pass
-            print(" City Not Found ")
-            roomtemp=float(input("Enter the temprature of the room"))
-            roomhum=float(input("Enter the humidity of the room"))
-        
-
+        except:
+            ConnectionError'''
+        '''
         #y=predictions.execute(age,weight,heatout,roomhum,roomtemp)
         #print(y)
         #self.value.setText("incubator_humidity to be set :",incuhum, "incubator_temperature to be set :",incutemp,"respiratory rate of the child per minute: ",resp_rate,"respiratory air volume in ml of the child",volume)
@@ -355,7 +488,7 @@ class PredScreen(QDialog):
 
         prediction_final=pd.concat([breath["resp_rate"],predictionsr["resp_rate"],breath["volume"],predictionsv["volume"]],axis=1)
         prediction_final.columns=["resp_rate_actual","resp_rate_prediction","volume_actual","volume_predicted"]
-
+        '''
 
 
         
@@ -394,6 +527,41 @@ class PredScreen(QDialog):
         print("respiratory rate of the child per minute",resp_rate)
         print("respiratory air volume in ml of the child",volume)
 
+        #requests.get('https://api.thingspeak.com/update?api_key=B5HXLPLMWO3DQE1O&field1='+str(temperature)+'&field2='+str(humidity)+'&field3='+str(incutemp)+'&field4='+str(incuhum)+'&field5='+str(resp_rate)+'&field6='+str(volume))
+        import serial
+        import time
+
+        ser=serial.Serial("COM5",9600,timeout=1)
+
+        time.sleep(2)
+        list1=[]
+        for i in range(0,2):
+            line=ser.readline()
+            line=line.decode("utf")
+            #print(line)
+    
+            if line not in ["DHTxx test!",""]:
+                y=line.split()
+                if len(y)>3 :
+                    humidity=y[1]
+                    temperature=y[3]
+                    time.sleep(10)
+                    if humidity in ["test","test!"]:
+                        continue
+
+                        
+                    import requests
+                    import time
+        
+
+                    requests.get('https://api.thingspeak.com/update?api_key=B5HXLPLMWO3DQE1O&field1='+str(temperature)+'&field2='+str(humidity)+'&field3='+str(incutemp)+'&field4='+str(incuhum)+'&field5='+str(resp_rate)+'&field6='+str(volume))
+
+
+        self.data1.setText("  incuhum "+str(round(incuhum,2)))
+        self.data2.setText("  incutemp "+str(round(incutemp,2)))
+        self.data3.setText("  resp_rate "+str(round(resp_rate,2)))
+        self.data4.setText("  volume "+str(round(volume,2)))
+        self.value.setText("value added to the cloud successfully")
         #Each time I add this,it should goto the cloud
 
 
@@ -407,6 +575,57 @@ class PredScreen(QDialog):
         dash=DashScreen()
         widget.addWidget(dash)
         widget.setCurrentIndex(widget.currentIndex()+1)
+
+class TableScreen(QDialog):
+    def __init__(self):
+        super(TableScreen,self).__init__()
+        loadUi("table.ui",self)
+        self.loaddata()
+        self.dash.clicked.connect(self.gotodash)
+        self.logout.clicked.connect(self.gotowelcome)
+
+    def loaddata(self):
+        
+        r=requests.get('https://api.thingspeak.com/channels/2246600/feeds.json?api_key=JJ9LVBW5OZR47G87')
+        n=json.loads(r.text)
+        '''for i in range(len(n['feeds'])):
+            list1=[n["feeds"][i]["entry_id"],n['feeds'][i]['field1'],n['feeds'][i]['field2'],n['feeds'][i]['field3'],n['feeds'][i]['field4'],n['feeds'][i]['field5'],n["feeds"][i]["field6"],n['feeds'][i]['created_at']]
+            #i is the row count
+            y=enumerate(list1)
+            for j in y:
+                self.registertable.setItem(i,j[0],QtWidgets.QTableWidgetItem(j[1]))'''
+        self.registertable.setRowCount(len(n["feeds"]))
+        for i in range(len(n["feeds"])):
+            list1=[n["feeds"][i]["entry_id"],n['feeds'][i]['field1'],n['feeds'][i]['field2'],n['feeds'][i]['field3'],n['feeds'][i]['field4'],n['feeds'][i]['field5'],n["feeds"][i]["field6"],n['feeds'][i]['created_at']]
+            #i is the row count
+            
+            self.registertable.setItem(i,0,QtWidgets.QTableWidgetItem(str(list1[1])))
+            self.registertable.setItem(i,1,QtWidgets.QTableWidgetItem(str(list1[2])))
+            self.registertable.setItem(i,2,QtWidgets.QTableWidgetItem(str(list1[3])))
+            self.registertable.setItem(i,3,QtWidgets.QTableWidgetItem(str(list1[4])))
+            self.registertable.setItem(i,4,QtWidgets.QTableWidgetItem(str(list1[5])))
+            self.registertable.setItem(i,5,QtWidgets.QTableWidgetItem(str(list1[6])))
+            self.registertable.setItem(i,6,QtWidgets.QTableWidgetItem(str(list1[7])))
+            self.registertable.setColumnWidth(6,500)
+            self.registertable.setColumnWidth(4,200)
+            self.registertable.setColumnWidth(5,200)
+
+        
+    
+
+    def gotowelcome(self):
+        welcome=WelcomeScreen()
+        widget.addWidget(welcome)
+        widget.setCurrentIndex(widget.currentIndex()+1)
+
+    def gotodash(self):
+        dash=DashScreen()
+        widget.addWidget(dash)
+        widget.setCurrentIndex(widget.currentIndex()+1)
+    
+
+        
+    
         
 app=QApplication(sys.argv)
 welcome=WelcomeScreen()
