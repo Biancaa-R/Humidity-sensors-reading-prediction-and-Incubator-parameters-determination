@@ -160,7 +160,7 @@ print("incubator_humidity to be set",incuhum)
 print("incubator_temperature to be set",incutemp)
 print("respiratory rate of the child per minute",resp_rate)
 print("respiratory air volume in ml of the child",volume)
-'''
+
 import requests
 import time
 import Adafruit_DHT as dht
@@ -208,4 +208,4 @@ def handle(msg):
         bot.sendMessage(chat_id, "breath rate of the child per minute: "+ str(resp_rate))  
 
 
-MessageLoop(bot, handle).run_as_thread()'''
+MessageLoop(bot, handle).run_as_thread()
