@@ -285,7 +285,7 @@ class TeleScreen(QDialog):
                             #humidity = round(humidity, 2)
                             #temperature = round(temperature, 2)
 
-        bot = telepot.Bot('6355723537:AAHCm412-9KGQFhM6xoO0C1D-DXsLMLvdYc')
+        bot = telepot.Bot('api key of bot')
 
         def handle(msg):
             content_type, chat_type, chat_id = telepot.glance(msg)
