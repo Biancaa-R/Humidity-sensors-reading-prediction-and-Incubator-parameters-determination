@@ -259,7 +259,7 @@ class TeleScreen(QDialog):
             time.sleep(0.5)
             list1=[]
 
-            for i in range(0,5):
+            for i in range(0,6):
                 line=ser.readline()
 
                 line=line.decode("utf")
@@ -301,7 +301,7 @@ class TeleScreen(QDialog):
                             #humidity = round(humidity, 2)
                             #temperature = round(temperature, 2)
 
-        bot = telepot.Bot('api key here')
+        bot = telepot.Bot('6355723537:AAHCm412-9KGQFhM6xoO0C1D-DXsLMLvdYc')
 
         def handle(msg):
             content_type, chat_type, chat_id = telepot.glance(msg)
@@ -333,9 +333,34 @@ class TeleScreen(QDialog):
 
             if (msg['text'].lower() in ["thanks","thank you","thankyou"] ):
                 bot.sendMessage(chat_id,"welcome ")
+
+        '''def retry_on_error(func, wait=0.1, retry=0, *args, *kwargs):
+            i=0
+            while True:
+                try:
+                    return func(*args,*kwargs)
+                    break
+                except telegram.error.NetworkError:
+                    logging.exception(f"Network Error.Retr'''
+        def retry_on_error(func, wait=0.1, retry=0, *args, **kwargs):
+            i = 0
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                    break
+                except telegram.error.NetworkError:
+                    logging.exception(f"Network Error. Retrying...{i}")
+                    i += 1
+                    time.sleep(wait)
+                    if retry != 0 and i == retry:
+                        break
+                        
                 
 
+        
         MessageLoop(bot, handle).run_as_thread()
+
+        
 
 
 
