@@ -8,6 +8,8 @@ Preterm birth or more commonly known as premature birth, is the birth of an infa
 
 In the proposed infant incubator system, Is going to predict the incubator parameters. That is the temperature and the relative humidity to be maintained inside the incubator for the highest chance of success rate for the child placed inside the incubator. This ideology can also be extended for hatcheries as well, making sure that with the predicted values of parameters , the baby is present in an optimum environment.  
 
+Based on the age and the weight of the baby , the respiratory rate and the respiratory volume of the infant is also predicted using machine learning to make sure the child is in a state of normalcy.
+
 <b> Connected external circuit</b>
 
 <img src="https://github.com/Biancaa-R/Humidity-sensors-reading-prediction-and-Incubator-parameters-determination/blob/main/pictures/diag.png" allign="center">
